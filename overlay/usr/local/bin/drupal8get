@@ -1,0 +1,14 @@
+#!/bin/sh
+
+get_sslkey()
+{
+  $sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
+	echo "$sslkey"
+}
+
+
+# Stub for something which gets quasselsettings
+case $1 in
+	sslkey) 	;;
+	*) echo "Unknown option" ;;
+esac

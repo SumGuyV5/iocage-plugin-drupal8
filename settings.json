@@ -1,0 +1,13 @@
+{
+        "servicerestart":"service apache24 restart","service mysql-server restart"
+        "serviceget": "/usr/local/bin/drupal8get",
+        "serviceset": "/usr/local/bin/drupal8set",
+        "options": {
+                "sslkey": {
+                        "type": "string",
+                        "name": "SSL Private Key",
+                        "description": "Put your SSL Private Key here",
+                        "requirerestart": true
+                }
+        }
+}
