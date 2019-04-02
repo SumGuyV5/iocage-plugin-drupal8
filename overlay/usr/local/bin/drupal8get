@@ -1,14 +1,45 @@
 #!/bin/sh
 
+SHOWSSL=TRUE
+MESSAGE="Can not show ssl private.key or certificate.crt... Change SNOWSSL to TRUE the /usr/local/bin/drupal8get script."
+
 get_sslkey()
 {
-  $sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
-	echo "$sslkey"
+  if [ $SHOWSSL = TRUE ] ; then
+    sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
+  else
+    sslkey=$MESSAGE
+  fi
+  echo "$sslkey
 }
 
+get_sslcert()
+{
+  if [ $SHOWSSL = TRUE ] ; then
+    sslcert=$(cat /usr/local/etc/apache24/ssl/certificate.crt)
+  else
+    sslcert=$MESSAGE
+  fi
+  echo "$sslcert"
+}
+
+get_drupaltrust()
+{
+  drupaltrust=$(sed -n -e '/^\$settings\['\''trusted_host_patterns'\''] = \[$/,/^];$/{ /^\$settings\['\''trusted_host_patterns'\''] = \[$/d; /^];$/d; p; } /usr/local/www/drupal8/sites/default/settings.php)
+  echo "$drupaltrust"
+}
+
+get_apacheconf()
+{
+  apacheconf=$(cat /usr/local/etc/apache24/Includes/drupal.conf)
+  echo "$apacheconf"
+}
 
 # Stub for something which gets quasselsettings
 case $1 in
-	sslkey) 	;;
+	sslkey) get_sslkey ;;
+	sslcert) get_sslcert ;;
+	drupaltrust) get_drupaltrust ;;
+  apacheconf) get_apacheconf ;;
 	*) echo "Unknown option" ;;
 esac

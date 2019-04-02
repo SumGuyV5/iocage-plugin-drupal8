@@ -1,13 +1,42 @@
 {
-        "servicerestart":"service apache24 restart","service mysql-server restart"
+        "servicerestart": "service apache24 restart",
         "serviceget": "/usr/local/bin/drupal8get",
         "serviceset": "/usr/local/bin/drupal8set",
         "options": {
                 "sslkey": {
                         "type": "string",
                         "name": "SSL Private Key",
-                        "description": "Put your SSL Private Key here",
+                        "description": "Put your SSL Private Key here.",
                         "requirerestart": true
+                },
+                "sslcert": {
+                        "type": "string",
+                        "name": "SSL Certificate",
+                        "description": "Put your SSL Certificate here.",
+                        "requirerestart": true
+                },
+                "drupaltrust": {
+                        "type": "string",
+                        "name": "Drupal trusted host patterns",
+                        "description": "Drupal trusted host patterns.",
+                        "requirerestart": true
+                },
+                "apacheconf": {
+                        "type": "string",
+                        "name": "Apache Drupal Config",
+                        "description": "Apache Drupal Config.",
+                        "requirerestart": true
+                },
+                "adminpasswd": {
+                        "type": "add",
+                        "name": "Admin password",
+                        "description": "Chanage Drupal 8 admin user password.",
+                        "requiredargs": {
+                                "password": {
+                                        "type": "password",
+                                        "description": "Chanage Drupal 8 admin user password."
+                                }                                
+                        }                        
                 }
         }
 }

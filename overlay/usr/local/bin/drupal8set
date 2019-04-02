@@ -1,65 +1,75 @@
 #!/bin/sh
 
-set_port()
+set_sslkey()
 {
-	newargs=""
-	while [ $# -gt 0 ]
-	do
-		if [ "$1" = "-p" ] ; then
-			shift
-			shift
-			continue
-		fi
-		newargs="$newargs $1"
-		shift
-	done
-	newargs="$newargs -p $NEWPORT"
-	sysrc -f /etc/rc.conf quasselcore_args="$newargs"
-	exit 0
+  if [ $? -eq 0 ] && [ $1 != "" ] ; then
+    echo "Changing /usr/local/etc/apache24/ssl/private.key..."
+    echo $1 > /usr/local/etc/apache24/ssl/private.key
+  else
+    echo "Error when updateing /usr/local/etc/apache24/ssl/private.key">2 ; exit 1
+  fi
+  exit 0
 }
 
-set_sslmode()
+set_sslcert()
 {
-	newargs=""
-	while [ $# -gt 0 ]
-	do
-		if [ "$1" = "--require-ssl" ] ; then
-			shift
-			continue
-		fi
-		newargs="$newargs $1"
-		shift
-	done
-	if [ "$NEWSSLMODE" = "true" ] ; then
-		newargs="$newargs --require-ssl"
-	fi
-	sysrc -f /etc/rc.conf quasselcore_args="$newargs"
-	exit 0
-
+  if [ $? -eq 0 ] && [ $1 != "" ] ; then
+    echo "Changing /usr/local/etc/apache24/ssl/certificate.crt..."
+    echo $1 > /usr/local/etc/apache24/ssl/certificate.crt
+  else
+    echo "Error when updateing /usr/local/etc/apache24/ssl/certificate.crt">2 ; exit 1
+  fi
+  exit 0
 }
 
-set_ssloption()
+set_drupaltrust()
 {
-   # Bogus value
-   echo "tlsallow"
+  input=$1
+  if [ $? -eq 0 ] && [ $input != "" ] ; then
+    echo "Changing /usr/local/www/drupal8/sites/default/settings.php..."
+    sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/{ :q
+    N
+    $!bq
+    s/.*/\$settings\['\''trusted_host_patterns'\''] = \[\
+  '${input}'\
+];/g;}' settings.php
+    sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/{s/\./\\\./g;}' settings.php
+  else
+    echo "Error when updateing /usr/local/www/drupal8/sites/default/settings.php">2 ; exit 1
+  fi
+  exit 0
 }
 
-adduser()
+set_apacheconf()
 {
-	# Retarded how you add users to quassel
-	# Example only
-	printf "$1\n$2\n$2\n" | quasselcore --configdir=/var/db/quassel --add-user
+  if [ $? -eq 0 ] && [ $1 != "" ] ; then
+    echo "Changing /usr/local/etc/apache24/Includes/drupal.conf..."
+    echo $1 > /usr/local/etc/apache24/Includes/drupal.conf
+  else
+    echo "Error when updateing /usr/local/etc/apache24/Includes/drupal.conf">2 ; exit 1
+  fi
+  exit 0
 }
+
+set_adminpasswd()
+{
+  PASSWD=$1
+  if [ $? -eq 0 ] && [ $PASSWD != "" ] ; then
+    echo "Changing Drupal Admin password..."
+    drush user-password admin --password="$PASSWD" -r /usr/local/www/drupal8
+  else
+    echo "Error when updateing Drupal 8 admin password.">2 ; exit 1
+  fi
+  exit 0
+}
+
 
 # Stub for something which sets quasselsettings
 case $1 in
-	port) 	serviceflags=`sysrc -n -f /etc/rc.conf quasselcore_args`
-		NEWPORT="$2"
- 		set_port $serviceflags ;;
-	sslmode) serviceflags=`sysrc -n -f /etc/rc.conf quasselcore_args`
-		NEWSSLMODE="$2"
- 		set_sslmode $serviceflags ;;
-	ssloption) set_ssloption ;;
-	adduser) adduser "$2" "$3" ;;
+	sslkey) set_sslkey $2 ;;
+	sslcert) set_sslcert $2 ;;
+	drupaltrust) set_drupaltrust $2 ;;
+	apacheconf) set_apacheconf $2 ;;
+  adminpasswd) set_adminpasswd $2 ;;
 	*) echo "Unknown option" ;;
 esac

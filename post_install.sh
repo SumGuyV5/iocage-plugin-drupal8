@@ -19,24 +19,6 @@ IP_ADDRESS=$(ifconfig | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | awk '{ prin
 
 IP_ESC=$(echo $IP_ADDRESS | sed 's/\./\\./g')
 
-#PHP_VER="php72"
-#
-#pkg install -y apache24
-#  pkg install -y mysql56-server 
-#  pkg install -y mysql56-client
-#  pkg install -y ${PHP_VER}
-#  pkg install -y ${PHP_VER}-zlib
-#  #pkg install -y php56-pecl-uploadprogress
-#  pkg install -y ${PHP_VER}-extensions
-#  pkg install -y ${PHP_VER}-curl
-#  pkg install -y ${PHP_VER}-mysqli
-#  pkg install -y ${PHP_VER}-hash
-#  pkg install -y ${PHP_VER}-gd
-#  pkg install -y ${PHP_VER}-pdo_mysql
-#  pkg install -y mod_${PHP_VER}  
-#  pkg install -y $DRUPAL_VER
-#  pkg install -y drush-${PHP_VER} 
-
 # mysql config
  
 service mysql-server start
