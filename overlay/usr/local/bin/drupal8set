@@ -30,7 +30,9 @@ set_drupaltrust()
 {
   shift
   #strip out newlines and replace them with @ @
+echo "$@"
   input=$(echo "$@" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/@ @/g')
+echo "$input"
   #find the trusted_host_patterns Array, remove the old data and put the new data from input in.
   if [ $? -eq 0 ] && [ "$input" != "" ] ; then
     echo "Changing /usr/local/www/drupal8/sites/default/settings.php..."
@@ -53,8 +55,9 @@ set_drupaltrust()
 
 set_apacheconf()
 {
+  shift
   apacheconf=$@
-  if [ $? -eq 0 ] && [ $apacheconf != "" ] ; then
+  if [ $? -eq 0 ] && [ "$apacheconf" != "" ] ; then
     echo "Changing /usr/local/etc/apache24/Includes/drupal.conf..."
     echo "$apacheconf" > /usr/local/etc/apache24/Includes/drupal.conf
   else
@@ -77,11 +80,12 @@ set_adminpasswd()
 
 
 # Stub for something which sets quasselsettings
+echo "$@"
 case $1 in
 	sslkey) set_sslkey "$@" ;;
 	sslcert) set_sslcert "$@" ;;
 	drupaltrust) set_drupaltrust "$@" ;;
 	apacheconf) set_apacheconf "$@" ;;
-  adminpasswd) set_adminpasswd $2 ;;
+  adminpasswd) set_adminpasswd "$2" ;;
 	*) echo "Unknown option" ;;
 esac
