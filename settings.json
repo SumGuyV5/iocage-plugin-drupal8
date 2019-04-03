@@ -8,25 +8,25 @@
                         "name": "SSL Private Key",
                         "description": "Put your SSL Private Key here.",
                         "requirerestart": true
-                }
+                },
                 "sslcert": {
                         "type": "string",
                         "name": "SSL Certificate",
                         "description": "Put your SSL Certificate here.",
                         "requirerestart": true
-                }
+                },
                 "drupaltrust": {
                         "type": "string",
                         "name": "Drupal trusted host patterns",
                         "description": "Drupal trusted host patterns.",
                         "requirerestart": true
-                }
+                },
                 "apacheconf": {
                         "type": "string",
                         "name": "Apache Drupal Config",
                         "description": "Apache Drupal Config.",
                         "requirerestart": true
-                }
+                },
                 "adminpasswd": {
                         "type": "add",
                         "name": "Admin password",

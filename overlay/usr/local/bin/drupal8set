@@ -2,9 +2,11 @@
 
 set_sslkey()
 {
-  if [ $? -eq 0 ] && [ $1 != "" ] ; then
+  shift
+  key=$@
+  if [ $? -eq 0 ] && [ "$key" != "" ] ; then
     echo "Changing /usr/local/etc/apache24/ssl/private.key..."
-    echo $1 > /usr/local/etc/apache24/ssl/private.key
+    echo "$key" > /usr/local/etc/apache24/ssl/private.key
   else
     echo "Error when updateing /usr/local/etc/apache24/ssl/private.key">2 ; exit 1
   fi
@@ -13,9 +15,11 @@ set_sslkey()
 
 set_sslcert()
 {
-  if [ $? -eq 0 ] && [ $1 != "" ] ; then
+  shift
+  cert=$@
+  if [ $? -eq 0 ] && [ "$cert" != "" ] ; then
     echo "Changing /usr/local/etc/apache24/ssl/certificate.crt..."
-    echo $1 > /usr/local/etc/apache24/ssl/certificate.crt
+    echo "$cert" > /usr/local/etc/apache24/ssl/certificate.crt
   else
     echo "Error when updateing /usr/local/etc/apache24/ssl/certificate.crt">2 ; exit 1
   fi
@@ -24,8 +28,9 @@ set_sslcert()
 
 set_drupaltrust()
 {
-  input=$1
-  if [ $? -eq 0 ] && [ $input != "" ] ; then
+  shift
+  input=$@
+  if [ $? -eq 0 ] && [ "$input" != "" ] ; then
     echo "Changing /usr/local/www/drupal8/sites/default/settings.php..."
     sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/{ :q
     N
@@ -42,9 +47,10 @@ set_drupaltrust()
 
 set_apacheconf()
 {
-  if [ $? -eq 0 ] && [ $1 != "" ] ; then
+  apacheconf=$@
+  if [ $? -eq 0 ] && [ $apacheconf != "" ] ; then
     echo "Changing /usr/local/etc/apache24/Includes/drupal.conf..."
-    echo $1 > /usr/local/etc/apache24/Includes/drupal.conf
+    echo "$apacheconf" > /usr/local/etc/apache24/Includes/drupal.conf
   else
     echo "Error when updateing /usr/local/etc/apache24/Includes/drupal.conf">2 ; exit 1
   fi
@@ -66,10 +72,10 @@ set_adminpasswd()
 
 # Stub for something which sets quasselsettings
 case $1 in
-	sslkey) set_sslkey $2 ;;
-	sslcert) set_sslcert $2 ;;
-	drupaltrust) set_drupaltrust $2 ;;
-	apacheconf) set_apacheconf $2 ;;
+	sslkey) set_sslkey $@ ;;
+	sslcert) set_sslcert $@ ;;
+	drupaltrust) set_drupaltrust $@ ;;
+	apacheconf) set_apacheconf $@ ;;
   adminpasswd) set_adminpasswd $2 ;;
 	*) echo "Unknown option" ;;
 esac

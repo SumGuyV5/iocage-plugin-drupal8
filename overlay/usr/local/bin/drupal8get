@@ -10,7 +10,7 @@ get_sslkey()
   else
     sslkey=$MESSAGE
   fi
-  echo "$sslkey
+  echo "$sslkey"
 }
 
 get_sslcert()
@@ -25,8 +25,8 @@ get_sslcert()
 
 get_drupaltrust()
 {
-  drupaltrust=$(sed -n -e '/^\$settings\['\''trusted_host_patterns'\''] = \[$/,/^];$/{ /^\$settings\['\''trusted_host_patterns'\''] = \[$/d; /^];$/d; p; }'\
-   /usr/local/www/drupal8/sites/default/settings.php)
+  drupaltrust=$(sed -n -e '/^\$settings\['\''trusted_host_patterns'\''] = \[$/,/^];$/{ /^\$settings\['\''trusted_host_patterns'\''] = \[$/d; /^];$/d; p; }' \
+  /usr/local/www/drupal8/sites/default/settings.php)
   echo "$drupaltrust"
 }
 
