@@ -29,35 +29,19 @@ set_sslcert()
 set_drupaltrust()
 {
   shift
-  #strip out newlines and replace them with @ @
-echo "$@"
-  input=$(echo "$@" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/@ @/g')
-echo "$input"
-  #find the trusted_host_patterns Array, remove the old data and put the new data from input in.
-  if [ $? -eq 0 ] && [ "$input" != "" ] ; then
-    echo "Changing /usr/local/www/drupal8/sites/default/settings.php..."
-    sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/{ :q
-    N
-    $!bq
-    s/.*/\$settings\['\''trusted_host_patterns'\''] = \[\
-  '"$input"'\
-];/g;}' /usr/local/www/drupal8/sites/default/settings.php
-    #we need to add \ to the . because they did not get transferred with the above sed command
-    sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/{s/\./\\\./g;}' /usr/local/www/drupal8/sites/default/settings.php
-    #we need to change the @ @ back to newlines
-    sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/{s/@ @/\
-/g;}' /usr/local/www/drupal8/sites/default/settings.php
-  else
-    echo "Error when updateing /usr/local/www/drupal8/sites/default/settings.php">2 ; exit 1
-  fi
+  input=$@
+  input=$( echo "$input" | sed -e 's/'\'' /'\'',/g')
+  sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/d' settings.php
+  echo "\$settings['trusted_host_patterns'] = [" >> settings.php
+  echo "$input" >> settings.php
+  echo "];" >> settings.php
   exit 0
 }
 
 set_apacheconf()
 {
-  shift
   apacheconf=$@
-  if [ $? -eq 0 ] && [ "$apacheconf" != "" ] ; then
+  if [ $? -eq 0 ] && [ $apacheconf != "" ] ; then
     echo "Changing /usr/local/etc/apache24/Includes/drupal.conf..."
     echo "$apacheconf" > /usr/local/etc/apache24/Includes/drupal.conf
   else
@@ -80,12 +64,11 @@ set_adminpasswd()
 
 
 # Stub for something which sets quasselsettings
-echo "$@"
 case $1 in
 	sslkey) set_sslkey "$@" ;;
 	sslcert) set_sslcert "$@" ;;
 	drupaltrust) set_drupaltrust "$@" ;;
 	apacheconf) set_apacheconf "$@" ;;
-  adminpasswd) set_adminpasswd "$2" ;;
+  adminpasswd) set_adminpasswd $2 ;;
 	*) echo "Unknown option" ;;
 esac

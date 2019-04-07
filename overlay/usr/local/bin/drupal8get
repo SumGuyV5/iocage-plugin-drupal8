@@ -3,6 +3,14 @@
 SHOWSSL=TRUE
 MESSAGE="Can not show ssl private.key or certificate.crt... Change SNOWSSL to TRUE the /usr/local/bin/drupal8get script."
 
+get_all()
+{
+  get_sslkey
+  get_sslcert
+  get_drupaltrust
+  get_apacheconf
+}
+
 get_sslkey()
 {
   if [ $SHOWSSL = TRUE ] ; then
@@ -38,6 +46,7 @@ get_apacheconf()
 
 # Stub for something which gets quasselsettings
 case $1 in
+  getall) get_all ;;
 	sslkey) get_sslkey ;;
 	sslcert) get_sslcert ;;
 	drupaltrust) get_drupaltrust ;;
