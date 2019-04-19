@@ -28,13 +28,13 @@ set_sslcert()
 
 set_drupaltrust()
 {
+  SETTINGS="/usr/local/www/drupal8/sites/default/settings.php"
   shift
-  input=$@
-  input=$( echo "$input" | sed -e 's/'\'' /'\'',/g')
-  sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/d' settings.php
-  echo "\$settings['trusted_host_patterns'] = [" >> settings.php
-  echo "$input" >> settings.php
-  echo "];" >> settings.php
+  input=$( echo "$@" | sed -e 's/'\'' /'\'',/g' -e 's/'\''$/'\'',/g')  
+  sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/d' $SETTINGS
+  echo "\$settings['trusted_host_patterns'] = [" >> $SETTINGS
+  echo "$input" >> $SETTINGS
+  echo "];" >> $SETTINGS
   exit 0
 }
 
