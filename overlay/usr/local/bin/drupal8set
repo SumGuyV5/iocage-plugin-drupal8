@@ -30,6 +30,7 @@ set_drupaltrust()
 {
   SETTINGS="/usr/local/www/drupal8/sites/default/settings.php"
   shift
+  #We need this line to add the commas back
   input=$( echo "$@" | sed -e 's/'\'' /'\'',/g' -e 's/'\''$/'\'',/g')  
   sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/d' $SETTINGS
   echo "\$settings['trusted_host_patterns'] = [" >> $SETTINGS
