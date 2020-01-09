@@ -52,8 +52,6 @@ service mysql-server restart
 
 mkdir -p /usr/local/www/$DRUPAL_VER/sites/default/files/private
 
-chown -R www:www /usr/local/www/$DRUPAL_VER/
-
 echo "Drupal Config Starting...."
 DRUPAL_ADMIN=$(drush -y site-install standard -r /usr/local/www/${DRUPAL_VER} \
   --db-url="mysql://${DRUPAL_DB_USER}:${DRUPAL_DB_USER_PASS}@localhost/${DRUPAL_DB}" \
@@ -70,6 +68,8 @@ cat >> /usr/local/www/drupal8/sites/default/settings.php << EOF
   '^127\.0\.0\.1$',
 ];
 EOF
+
+chown -R www:www /usr/local/www/$DRUPAL_VER/
   
 cat > /usr/local/etc/apache24/Includes/drupal.conf <<EOF
 <VirtualHost *:80>
