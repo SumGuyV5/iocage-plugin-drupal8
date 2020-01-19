@@ -133,7 +133,7 @@ AddType application/x-httpd-php .php
 service apache24 restart 2>/dev/null
 service mysql-server restart 2>/dev/null
 
-echo "drupal8 now installed.\n" > /root/PLUGIN_INFO
-echo "\nYour MySQL Root password is \"${MYSQL_ROOT_PASS}\".\n" > /root/PLUGIN_INFO
-echo "\nYour Drupal Database password is \"${DRUPAL_DB_USER_PASS}\".\n" > /root/PLUGIN_INFO
-echo "\nDrupal Admin user Password is \"${DRUPAL_ADMIN}\".\n" > /root/PLUGIN_INFO
+echo -e "drupal8 now installed.\n" >> /root/PLUGIN_INFO
+echo -e "\nYour MySQL Root password is \"${MYSQL_ROOT_PASS}\".\n" >> /root/PLUGIN_INFO
+echo -e "\nYour Drupal Database password is \"${DRUPAL_DB_USER_PASS}\".\n" >> /root/PLUGIN_INFO
+echo -e "\nDrupal Admin user Password is \"${DRUPAL_ADMIN}\".\n" >> /root/PLUGIN_INFO
