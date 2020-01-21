@@ -44,6 +44,20 @@ get_apacheconf()
   echo "$apacheconf"
 }
 
+get_update()
+{
+  echo "Going into maintenance mode."
+  drush sset system.maintenance_mode 1
+  drush cache-rebuild
+  
+  echo "Doing Update."
+  drush up --yes
+  
+  echo "Leaving maintenance mode."
+  drush sset system.maintenance_mode 0
+  drush cache-rebuild
+}
+
 # Stub for something which gets quasselsettings
 case $1 in
   getall) get_all ;;
@@ -51,5 +65,6 @@ case $1 in
 	sslcert) get_sslcert ;;
 	drupaltrust) get_drupaltrust ;;
   apacheconf) get_apacheconf ;;
+  update) get_update ;;
 	*) echo "Unknown option" ;;
 esac
