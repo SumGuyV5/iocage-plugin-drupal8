@@ -46,6 +46,8 @@ get_apacheconf()
 
 get_update()
 {
+  cd /usr/local/www/drupal8/
+
   echo "Going into maintenance mode."
   drush sset system.maintenance_mode 1
   drush cache-rebuild
