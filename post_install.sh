@@ -22,23 +22,36 @@ IP_ESC=$(echo $IP_ADDRESS | sed 's/\./\\./g')
 # mysql config
  
 service mysql-server start
-  
-mysql_secure_installation <<EOF
 
-y
-$MYSQL_ROOT_PASS
-$MYSQL_ROOT_PASS
-y
-y
-y
-y
+MYSQL_PASS=$(tail -1 /root/.mysql_secret)
+
+mysql -uroot -p"$MYSQL_PASS" -e "SET PASSWORD FOR root@'localhost' = PASSWORD('$MYSQL_ROOT_PASS');" --connect-expired-password
+
+mysql -uroot -p"$MYSQL_ROOT_PASS" <<EOF
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
 EOF
+
+#will not work with mysql57?????
+#mysql_secure_installation <<EOF
+
+#y
+#$MYSQL_ROOT_PASS
+#$MYSQL_ROOT_PASS
+#y
+#y
+#y
+#y
+#EOF
   
-echo 'innodb_large_prefix=true' >> /usr/local/my.cnf
-echo 'innodb_file_format=barracuda' >> /usr/local/my.cnf
-echo 'innodb_file_per_table=true' >> /usr/local/my.cnf 
+#echo 'innodb_large_prefix=true' >> /usr/local/my.cnf
+#echo 'innodb_file_format=barracuda' >> /usr/local/my.cnf
+#echo 'innodb_file_per_table=true' >> /usr/local/my.cnf 
   
-mysql -uroot -p$MYSQL_ROOT_PASS <<EOF
+mysql -uroot -p"$MYSQL_ROOT_PASS" <<EOF
 create database ${DRUPAL_DB};
 create user ${DRUPAL_DB_USER}@localhost identified by '${DRUPAL_DB_USER_PASS}';
 grant all privileges on ${DRUPAL_DB}.* to ${DRUPAL_DB_USER}@localhost identified by '${DRUPAL_DB_USER_PASS}';
