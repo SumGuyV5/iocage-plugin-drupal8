@@ -117,7 +117,11 @@ sed -i.bak '/^#LoadModule ssl_module libexec\/apache24\/mod_ssl.so/s/^#//g' /usr
   
 mkdir -p /usr/local/etc/apache24/ssl
 cd /usr/local/etc/apache24/ssl
-openssl genrsa -rand -genkey -out private.key 2048
+
+#The line bellow had issues in freebsd 12, /root/.rnd file is missing on freebsd 12?
+#openssl genrsa -rand -genkey -out private.key 2048
+#Replacement line
+openssl genrsa -out private.key 2048
   
 openssl req -new -x509 -days 365 -key private.key -out certificate.crt -sha256 -subj "/C=CA/ST=ONTARIO/L=TORONTO/O=Global Security/OU=IT Department/CN=${MY_SERVER_NAME}"
   
