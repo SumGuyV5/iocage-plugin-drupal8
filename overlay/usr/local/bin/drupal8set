@@ -1,66 +1,68 @@
 #!/bin/sh
 
+DRUPAL_VER=drupal8
+
 set_sslkey()
 {
-  shift
-  key=$@
-  if [ $? -eq 0 ] && [ "$key" != "" ] ; then
-    echo "Changing /usr/local/etc/apache24/ssl/private.key..."
-    echo "$key" > /usr/local/etc/apache24/ssl/private.key
-  else
-    echo "Error when updateing /usr/local/etc/apache24/ssl/private.key">2 ; exit 1
-  fi
-  exit 0
+	shift
+	key=$@
+	if [ $? -eq 0 ] && [ "$key" != "" ] ; then
+		echo "Changing /usr/local/etc/apache24/ssl/private.key..."
+		echo "$key" > /usr/local/etc/apache24/ssl/private.key
+	else
+		echo "Error when updateing /usr/local/etc/apache24/ssl/private.key">2 ; exit 1
+	fi
+	exit 0
 }
 
 set_sslcert()
 {
-  shift
-  cert=$@
-  if [ $? -eq 0 ] && [ "$cert" != "" ] ; then
-    echo "Changing /usr/local/etc/apache24/ssl/certificate.crt..."
-    echo "$cert" > /usr/local/etc/apache24/ssl/certificate.crt
-  else
-    echo "Error when updateing /usr/local/etc/apache24/ssl/certificate.crt">2 ; exit 1
-  fi
-  exit 0
+	shift
+	cert=$@
+	if [ $? -eq 0 ] && [ "$cert" != "" ] ; then
+		echo "Changing /usr/local/etc/apache24/ssl/certificate.crt..."
+		echo "$cert" > /usr/local/etc/apache24/ssl/certificate.crt
+	else
+		echo "Error when updateing /usr/local/etc/apache24/ssl/certificate.crt">2 ; exit 1
+	fi
+	exit 0
 }
 
 set_drupaltrust()
 {
-  SETTINGS="/usr/local/www/drupal8/sites/default/settings.php"
-  shift
-  #We need this line to add the commas back
-  input=$( echo "$@" | sed -e 's/'\'' /'\'',/g' -e 's/'\''$/'\'',/g')  
-  sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/d' $SETTINGS
-  echo "\$settings['trusted_host_patterns'] = [" >> $SETTINGS
-  echo "$input" >> $SETTINGS
-  echo "];" >> $SETTINGS
-  exit 0
+	SETTINGS="/usr/local/www/${DRUPAL_VER}/sites/default/settings.php"
+	shift
+	# We need this line to add the commas back
+	input=$( echo "$@" | sed -e 's/'\'' /'\'',/g' -e 's/'\''$/'\'',/g')  
+	sed -i.bak '/\$settings\['\''trusted_host_patterns'\''] = \[/,/];/d' $SETTINGS
+	echo "\$settings['trusted_host_patterns'] = [" >> $SETTINGS
+	echo "$input" >> $SETTINGS
+	echo "];" >> $SETTINGS
+	exit 0
 }
 
 set_apacheconf()
 {
-  apacheconf=$@
-  if [ $? -eq 0 ] && [ $apacheconf != "" ] ; then
-    echo "Changing /usr/local/etc/apache24/Includes/drupal.conf..."
-    echo "$apacheconf" > /usr/local/etc/apache24/Includes/drupal.conf
-  else
-    echo "Error when updateing /usr/local/etc/apache24/Includes/drupal.conf">2 ; exit 1
-  fi
-  exit 0
+	apacheconf=$@
+	if [ $? -eq 0 ] && [ $apacheconf != "" ] ; then
+		echo "Changing /usr/local/etc/apache24/Includes/drupal.conf..."
+		echo "$apacheconf" > /usr/local/etc/apache24/Includes/drupal.conf
+	else
+		echo "Error when updateing /usr/local/etc/apache24/Includes/drupal.conf">2 ; exit 1
+	fi
+	exit 0
 }
 
 set_adminpasswd()
 {
-  PASSWD=$1
-  if [ $? -eq 0 ] && [ $PASSWD != "" ] ; then
-    echo "Changing Drupal Admin password..."
-    drush user-password admin --password="$PASSWD" -r /usr/local/www/drupal8
-  else
-    echo "Error when updateing Drupal 8 admin password.">2 ; exit 1
-  fi
-  exit 0
+	PASSWD=$1
+	if [ $? -eq 0 ] && [ $PASSWD != "" ] ; then
+		echo "Changing Drupal Admin password..."
+		drush user-password admin --password="$PASSWD" -r /usr/local/www/${DRUPAL_VER}
+	else
+		echo "Error when updateing Drupal 8 admin password.">2 ; exit 1
+	fi
+	exit 0
 }
 
 
@@ -70,6 +72,6 @@ case $1 in
 	sslcert) set_sslcert "$@" ;;
 	drupaltrust) set_drupaltrust "$@" ;;
 	apacheconf) set_apacheconf "$@" ;;
-  adminpasswd) set_adminpasswd $2 ;;
+	adminpasswd) set_adminpasswd $2 ;;
 	*) echo "Unknown option" ;;
 esac

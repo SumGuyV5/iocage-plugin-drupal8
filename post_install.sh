@@ -19,8 +19,7 @@ IP_ADDRESS=$(ifconfig | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | awk '{ prin
 
 IP_ESC=$(echo $IP_ADDRESS | sed 's/\./\\./g')
 
-# mysql config
- 
+# mysql config 
 service mysql-server start
 
 MYSQL_PASS=$(tail -1 /root/.mysql_secret)
@@ -35,22 +34,6 @@ DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 FLUSH PRIVILEGES;
 EOF
 
-#will not work with mysql57?????
-#mysql_secure_installation <<EOF
-
-#y
-#$MYSQL_ROOT_PASS
-#$MYSQL_ROOT_PASS
-#y
-#y
-#y
-#y
-#EOF
-  
-#echo 'innodb_large_prefix=true' >> /usr/local/my.cnf
-#echo 'innodb_file_format=barracuda' >> /usr/local/my.cnf
-#echo 'innodb_file_per_table=true' >> /usr/local/my.cnf 
-  
 mysql -uroot -p"$MYSQL_ROOT_PASS" <<EOF
 create database ${DRUPAL_DB};
 create user ${DRUPAL_DB_USER}@localhost identified by '${DRUPAL_DB_USER_PASS}';
@@ -58,73 +41,69 @@ grant all privileges on ${DRUPAL_DB}.* to ${DRUPAL_DB_USER}@localhost identified
 flush privileges;
 \q
 EOF
-      
+
 service mysql-server restart
 
 # drupal config
-
 mkdir -p /usr/local/www/$DRUPAL_VER/sites/default/files/private
 
 echo "Drupal Config Starting...."
 DRUPAL_ADMIN=$(drush -y site-install standard -r /usr/local/www/${DRUPAL_VER} \
-  --db-url="mysql://${DRUPAL_DB_USER}:${DRUPAL_DB_USER_PASS}@localhost/${DRUPAL_DB}" \
-  --site-name=${MY_SERVER_NAME} 2>&1 | grep password)
+	--db-url="mysql://${DRUPAL_DB_USER}:${DRUPAL_DB_USER_PASS}@localhost/${DRUPAL_DB}" \
+	--site-name=${MY_SERVER_NAME} 2>&1 | grep password)
 echo "Drupal Config Ending....."
 echo $DRUPAL_ADMIN
 DRUPAL_ADMIN=$(echo $DRUPAL_ADMIN | awk '{ print $8}')
-  
-cat >> /usr/local/www/drupal8/sites/default/settings.php << EOF
+
+cat >> /usr/local/www/$DRUPAL_VER/sites/default/settings.php << EOF
 \$settings['trusted_host_patterns'] = [
-  '^$MY_SERVER_NAME_ESC$',
-  '^localhost$',
-  '^$IP_ESC$',
-  '^127\.0\.0\.1$',
+	'^$MY_SERVER_NAME_ESC$',
+	'^localhost$',
+	'^$IP_ESC$',
+	'^127\.0\.0\.1$',
 ];
 EOF
 
 chown -R www:www /usr/local/www/$DRUPAL_VER/
-  
+
 cat > /usr/local/etc/apache24/Includes/drupal.conf <<EOF
 <VirtualHost *:80>
-  ServerName $MY_SERVER_NAME
-  
-  DocumentRoot /usr/local/www/$DRUPAL_VER
-  <Directory "/usr/local/www/$DRUPAL_VER">
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-  </Directory>
+	ServerName $MY_SERVER_NAME
+
+	DocumentRoot /usr/local/www/$DRUPAL_VER
+	<Directory "/usr/local/www/$DRUPAL_VER">
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+	</Directory>
 </VirtualHost>
 <VirtualHost *:443>
-  ServerName $MY_SERVER_NAME
-  
-  SSLEngine on
-  SSLCertificateFile "/usr/local/etc/apache24/ssl/certificate.crt"
+	ServerName $MY_SERVER_NAME
 
-  SSLCertificateKeyFile "/usr/local/etc/apache24/ssl/private.key"
+	SSLEngine on
+	SSLCertificateFile "/usr/local/etc/apache24/ssl/certificate.crt"
 
-  DocumentRoot /usr/local/www/$DRUPAL_VER
-  <Directory "/usr/local/www/$DRUPAL_VER">
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-  </Directory>
+	SSLCertificateKeyFile "/usr/local/etc/apache24/ssl/private.key"
+
+	DocumentRoot /usr/local/www/$DRUPAL_VER
+	<Directory "/usr/local/www/$DRUPAL_VER">
+		Options Indexes FollowSymLinks
+		AllowOverride All
+		Require all granted
+	</Directory>
 </VirtualHost>
 EOF
 
 # apache config
 sed -i.bak '/^#LoadModule ssl_module libexec\/apache24\/mod_ssl.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
-  
+
 mkdir -p /usr/local/etc/apache24/ssl
 cd /usr/local/etc/apache24/ssl
 
-#The line bellow had issues in freebsd 12, /root/.rnd file is missing on freebsd 12?
-#openssl genrsa -rand -genkey -out private.key 2048
-#Replacement line
 openssl genrsa -out private.key 2048
-  
+
 openssl req -new -x509 -days 365 -key private.key -out certificate.crt -sha256 -subj "/C=CA/ST=ONTARIO/L=TORONTO/O=Global Security/OU=IT Department/CN=${MY_SERVER_NAME}"
-  
+
 cat > /usr/local/etc/apache24/modules.d/020_mod_ssl.conf <<EOF
 Listen 443
 
@@ -136,11 +115,11 @@ SSLPassPhraseDialog builtin
 
 SSLSessionCacheTimeout 300
 EOF
-  
+
 sed -i.bak '/^#LoadModule rewrite_module libexec\/apache24\/mod_rewrite.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
-  
+
 sed -i.bak '/^#LoadModule mime_magic_module libexec\/apache24\/mod_mime_magic.so/s/^#//g' /usr/local/etc/apache24/httpd.conf
-    
+
 sed -i.bak '/AddType application\/x-httpd-php .php/d' /usr/local/etc/apache24/httpd.conf
 sed -i.bak '/\<IfModule mime_module\>/a\
 AddType application/x-httpd-php .php
@@ -154,3 +133,4 @@ echo -e "drupal8 now installed.\n" > /root/PLUGIN_INFO
 echo -e "\nYour MySQL Root password is \"${MYSQL_ROOT_PASS}\".\n" >> /root/PLUGIN_INFO
 echo -e "\nYour Drupal Database password is \"${DRUPAL_DB_USER_PASS}\".\n" >> /root/PLUGIN_INFO
 echo -e "\nDrupal Admin user Password is \"${DRUPAL_ADMIN}\".\n" >> /root/PLUGIN_INFO
+echo -e "\nGo to https://${IP_ADDRESS} login and finish setup.\n" >> /root/PLUGIN_INFO

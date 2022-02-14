@@ -2,71 +2,72 @@
 
 SHOWSSL=TRUE
 MESSAGE="Can not show ssl private.key or certificate.crt... Change SNOWSSL to TRUE the /usr/local/bin/drupal8get script."
+DRUPAL_VER=drupal8
 
 get_all()
 {
-  get_sslkey
-  get_sslcert
-  get_drupaltrust
-  get_apacheconf
+	get_sslkey
+	get_sslcert
+	get_drupaltrust
+	get_apacheconf
 }
 
 get_sslkey()
 {
-  if [ $SHOWSSL = TRUE ] ; then
-    sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
-  else
-    sslkey=$MESSAGE
-  fi
-  echo "$sslkey"
+	if [ $SHOWSSL = TRUE ] ; then
+		sslkey=$(cat /usr/local/etc/apache24/ssl/private.key)
+	else
+		sslkey=$MESSAGE
+	fi
+	echo "$sslkey"
 }
 
 get_sslcert()
 {
-  if [ $SHOWSSL = TRUE ] ; then
-    sslcert=$(cat /usr/local/etc/apache24/ssl/certificate.crt)
-  else
-    sslcert=$MESSAGE
-  fi
-  echo "$sslcert"
+	if [ $SHOWSSL = TRUE ] ; then
+		sslcert=$(cat /usr/local/etc/apache24/ssl/certificate.crt)
+	else
+		sslcert=$MESSAGE
+	fi
+	echo "$sslcert"
 }
 
 get_drupaltrust()
 {
-  drupaltrust=$(sed -n -e '/^\$settings\['\''trusted_host_patterns'\''] = \[$/,/^];$/{ /^\$settings\['\''trusted_host_patterns'\''] = \[$/d; /^];$/d; p; }' \
-  /usr/local/www/drupal8/sites/default/settings.php)
-  echo "$drupaltrust"
+	drupaltrust=$(sed -n -e '/^\$settings\['\''trusted_host_patterns'\''] = \[$/,/^];$/{ /^\$settings\['\''trusted_host_patterns'\''] = \[$/d; /^];$/d; p; }' \
+	  /usr/local/www/${DRUPAL_VER}/sites/default/settings.php)
+	echo "$drupaltrust"
 }
 
 get_apacheconf()
 {
-  apacheconf=$(cat /usr/local/etc/apache24/Includes/drupal.conf)
-  echo "$apacheconf"
+	apacheconf=$(cat /usr/local/etc/apache24/Includes/drupal.conf)
+	echo "$apacheconf"
 }
 
 get_update()
 {
-  cd /usr/local/www/drupal8/
+	cd /usr/local/www/${DRUPAL_VER}/
 
-  echo "Going into maintenance mode."
-  drush sset system.maintenance_mode 1
-  drush cache-rebuild
-  
-  echo "Doing Update."
-  drush up --yes
-  
-  echo "Leaving maintenance mode."
-  drush sset system.maintenance_mode 0
-  drush cache-rebuild
+	echo "Going into maintenance mode."
+	drush vset --exact maintenance_mode 1
+	drush cache-clear all
+
+	echo "Doing Update."
+	drush pm-update drupal -y
+
+	echo "Leaving maintenance mode."
+	drush vset --exact maintenance_mode 0
+	drush cache-clear all
 }
 
 # Stub for something which gets quasselsettings
 case $1 in
-  getall) get_all ;;
+	getall) get_all ;;
 	sslkey) get_sslkey ;;
 	sslcert) get_sslcert ;;
 	drupaltrust) get_drupaltrust ;;
-  apacheconf) get_apacheconf ;;
-  update) get_update ;;
+	apacheconf) get_apacheconf ;;
+	update) get_update ;;
 	*) echo "Unknown option" ;;
 esac
